@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const user: any = {
@@ -22,10 +23,7 @@ const Navbar = () => {
     isAdmin: true,
   };
 
-  const { cartCount, setIsCartOpen } = {
-    cartCount: 5,
-    setIsCartOpen: (_data: any) => {},
-  };
+  const { cartCount, setIsCartOpen } = useCart();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -42,7 +40,7 @@ const Navbar = () => {
   const handleLogout = () => {
     setUserMenuOpen(false);
     navigate("/");
-  }
+  };
 
   return (
     <nav className="bg-white sticky top-0 z-50 border-b border-app-border">
@@ -184,7 +182,10 @@ const Navbar = () => {
 
                       {user && (
                         <div className="border-top border-app-border pt-1">
-                          <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-2.5 text-sm text-app-error hover:bg-red-50 w-full transition-colors">
+                          <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-app-error hover:bg-red-50 w-full transition-colors"
+                          >
                             <LogOutIcon size={16} /> Logout
                           </button>
                         </div>
