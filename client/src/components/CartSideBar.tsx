@@ -1,6 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { ShoppingBagIcon, XIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  MinusIcon,
+  PlusIcon,
+  ShoppingBagIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
 
 const CartSideBar = () => {
   const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "₹";
@@ -18,7 +25,7 @@ const CartSideBar = () => {
 
   if (!isCartOpen) return null;
 
-  const deliveryFee = cartTotal > 1500 ? 0 : 250;
+  const deliveryFee = cartTotal > 500 ? 0 : 50;
   const grandTotal = cartTotal + deliveryFee;
 
   return (
@@ -51,60 +58,123 @@ const CartSideBar = () => {
           </button>
         </div>
 
-        {items.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
-            <ShoppingBagIcon className="size-12 text-app-orange mb-3" />
-            <h3 className="text-lg font-semibold text-zinc-900">
-              Your cart is empty
-            </h3>
-            <p className="text-sm text-zinc-500 mt-2">
-              Add items to see them here.
-            </p>
-          </div>
-        ) : (
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {items.map((item) => (
+        {/* Items */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {items.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+              <ShoppingBagIcon className="size-16 text-app-border mb-4" />
+              <h3 className="text-lg font-medium mb-1">Your cart is empty</h3>
+            </div>
+          ) : (
+            items.map((item) => (
               <div
                 key={item.product._id}
-                className="flex items-center gap-3 rounded-2xl border border-app-border p-3"
+                className="flex gap-3 bg-app-cream/60 rounded-xl p-3"
               >
                 <img
+                  className="size-16 rounded-lg object-cover shrink-0"
                   src={item.product.image}
                   alt={item.product.name}
-                  className="size-14 rounded-xl object-cover"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-900 line-clamp-2">
+                  <h4 className="text-sm font-semibold truncate">
                     {item.product.name}
-                  </p>
-                  <p className="text-sm font-semibold text-app-orange mt-1">
+                  </h4>
+                  <p className="text-xs text-app-text-light">
                     {currency}
-                    {(item.product.price * item.quantity).toFixed(1)}
+                    {item.product.price.toFixed(2)} / {item.product.unit}
                   </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.product._id, item.quantity - 1)
-                    }
-                    className="size-7 rounded-full border border-app-border"
-                  >
-                    −
-                  </button>
-                  <span className="text-sm font-medium">{item.quantity}</span>
-                  <button
-                    onClick={() =>
-                      updateQuantity(item.product._id, item.quantity + 1)
-                    }
-                    className="size-7 rounded-full border border-app-border"
-                  >
-                    +
-                  </button>
+
+                  <div className="flex items-center justify-between mt-2">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() =>
+                          updateQuantity(item.product._id, item.quantity - 1)
+                        }
+                        className="size-7 rounded-lg bg-white border border-app-border flex-center"
+                      >
+                        <MinusIcon className="size-3" />
+                      </button>
+                      <span className="text-sm font-semibold w-6 text-center">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          updateQuantity(item.product._id, item.quantity + 1)
+                        }
+                        className="size-7 rounded-lg bg-white border border-app-border flex-center"
+                      >
+                        <PlusIcon className="size-3" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <span className="ttext-sm font-semibold">
+                        {currency}
+                        {(item.product.price * item.quantity).toFixed(2)}
+                      </span>
+
+                      <button
+                        onClick={() => removeFromCart(item.product._id)}
+                        className="p-1 text-app-text-light hover:text-app-error transition-colors"
+                      >
+                        <Trash2Icon className="size-4" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
+            ))
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-5 border-t border-app-border space-y-3">
+          <div className="flex justify-between text-sm">
+            <span className="text-app-text-light">Subtotal</span>
+            <span className="font-medium">
+              {currency}
+              {cartTotal.toFixed(2)}
+            </span>
           </div>
-        )}
+
+          <div className="flex justify-between text-sm">
+            <span className="text-app-text-light">Delivery</span>
+            <span className="font-medium">
+              {deliveryFee === 0 ? (
+                <span className="text-app-success">Free</span>
+              ) : (
+                `${currency}${deliveryFee.toFixed(2)}`
+              )}
+            </span>
+          </div>
+
+          {deliveryFee > 0 && (
+            <p className="text-xs text-app-text-light text-center">
+              Free delivery on orders over {currency}500!
+            </p>
+          )}
+
+          <div className="flex justify-between text-base font-semibold border-t border-app-border pt-3">
+            <span>Total</span>
+            <span>
+              {currency}
+              {grandTotal.toFixed(2)}
+            </span>
+          </div>
+
+          <button
+            onClick={() => {
+              setIsCartOpen(false);
+              navigate("/checkout");
+              window.scrollTo(0, 0);
+            }}
+            className="w-full py-3 bg-app-orange text-white font-semibold
+           rounded-xl hover:bg-app-orange-dark transition-colors flex-center gap-2 active:scale-[0.98]"
+          >
+            Proceed to Checkout <ArrowRightIcon className="size-4" />
+          </button>
+        </div>
       </div>
     </>
   );
