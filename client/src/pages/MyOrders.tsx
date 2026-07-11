@@ -82,7 +82,7 @@ const MyOrders = () => {
             {orders.map((order) => (
               <Link
                 key={order._id}
-                to={`/orders.${order._id}`}
+                to={`/orders/${order._id}`}
                 className="block mx-w-4xl bg-white rounded-2xl p-5 hover:shoadow transition-all"
               >
                 {/* Order id, date & status */}
