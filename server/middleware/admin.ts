@@ -25,9 +25,7 @@ const admin = async (req: Request, res: Response, next: NextFunction) => {
       if (req.user) req.user.isAdmin = true;
       next();
     } else {
-      res
-        .status(403)
-        .json({ message: "Admin verification failed" });
+      res.status(403).json({ message: "Admin verification failed" });
     }
   } catch (error: any) {
     console.log(error);
