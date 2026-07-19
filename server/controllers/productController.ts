@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma.js";
 
-// Get /api/products/flash-deals
+// Get: /api/products/flash-deals
 export const getFlashDeals = async (req: Request, res: Response) => {
   const products = await prisma.product.findMany({
     where: { stock: { gt: 0 } },
@@ -20,7 +20,7 @@ export const getFlashDeals = async (req: Request, res: Response) => {
   res.json({ products: productWithDiscount.slice(0, 8) });
 };
 
-// Get /api/products
+// Get: /api/products
 export const getProducts = async (req: Request, res: Response) => {
   const { category, search, minPrice, maxPrice, sort } = req.query;
   const where: any = {};
@@ -58,7 +58,7 @@ export const getProducts = async (req: Request, res: Response) => {
   res.json({ products: productWithDiscount });
 };
 
-// GET /api/products/:id
+// GET: /api/products/:id
 
 export const getProduct = async (req: Request, res: Response) => {
   const product = await prisma.product.findUnique({
@@ -79,4 +79,32 @@ export const getProduct = async (req: Request, res: Response) => {
       : 0;
 
   res.json({ product: { ...product, discount } });
+};
+
+// Post:  /api/products
+export const createProduct = async (req: Request, res: Response) => {
+  const product = await prisma.product.create({
+    data: req.body,
+  });
+
+  res.status(201).json({ product });
+};
+
+// Put: /api/product:id
+export const updateProduct = async (req: Request, res: Response) => {
+  const product = await prisma.product.update({
+    where: { id: req.params.id as string },
+    data: req.body,
+  });
+
+  res.json({ product });
+};
+
+// Delete: /api/product:id
+export const deleteProduct = async (req: Request, res: Response) => {
+  await prisma.product.delete({
+    where: { id: req.params.id as string },
+  });
+
+  res.json({ message: "Product deleted" });
 };
