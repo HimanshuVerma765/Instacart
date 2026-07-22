@@ -84,3 +84,26 @@ export const createOrder = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Get user's orders
+// Get: /api/orders
+export const userOrder = async (req: Request, res: Response) => {
+  const { status } = req.query;
+
+  const where: any = {
+    userId: req.user!.id,
+    NOT: [{ paymentMethod: "card", isPaid: false }],
+  };
+
+  if (status && status !== "all") {
+    where.status = status;
+  }
+
+  const orders = await prisma.order.findMany({
+    where,
+    include: { deliveryPartner: { select: { name: true, phone: true } } },
+    orderBy: { createdAt: "desc" },
+  });
+
+  res.json({ orders });
+};
