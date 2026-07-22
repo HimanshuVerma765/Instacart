@@ -155,5 +155,22 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
     data: { status, statusHistory: history },
   });
 
-  res.json({order:updateOrder});
+  res.json({ order: updateOrder });
+};
+
+// Get all orders (admin)
+// Get: /api/orders/all
+export const getAllOrders = async (req: Request, res: Response) => {
+  const orders = await prisma.order.findMany({
+    where: { NOT: [{ paymentMethod: "card", isPaid: false }] },
+    include: {
+      user: {
+        select: { name: true, email: true },
+        deliveryPartner: { select: { name: true, phone: true, email: true } },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  res.json({ orders });
 };
