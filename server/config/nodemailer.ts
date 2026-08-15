@@ -2,7 +2,7 @@ import { createTransport } from "nodemailer";
 
 // Create a transporter using SMTP
 const transporter = createTransport({
-  host: "smtp.example.com",
+  host: "smtp-relay.brevo.com",
   port: 587,
   auth: {
     user: process.env.SMTP_USER,
@@ -20,7 +20,7 @@ const sendEmail = async ({
   body: string;
 }) => {
   const response = await transporter.sendMail({
-    from: "",
+    from: process.env.SENDER_EMAIL,
     to,
     subject,
     html: body,
