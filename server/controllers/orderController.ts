@@ -177,7 +177,9 @@ export const getAllOrders = async (req: Request, res: Response) => {
     include: {
       user: {
         select: { name: true, email: true },
-        deliveryPartner: { select: { name: true, phone: true, email: true } },
+      },
+      deliveryPartner: {
+        select: { name: true, phone: true, email: true },
       },
     },
     orderBy: { createdAt: "desc" },

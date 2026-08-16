@@ -53,7 +53,8 @@ export const login = async (req, res) => {
         return res.status(400).json({ message: "Please provide all fields" });
     }
     const user = await prisma.user.findUnique({
-        where: { email: email.toLowerCase(), include: { addresses: true } },
+        where: { email: email.toLowerCase() },
+        include: { addresses: true },
     });
     if (!user) {
         return res
