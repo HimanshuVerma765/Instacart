@@ -8,6 +8,7 @@ import orderRouter from "./routes/orderRoutes.js";
 import { serve } from "inngest/express";
 import { inngest, functions } from "./inngest/index.js";
 import addressRouter from "./routes/addressRoutes.js";
+import adminRouter from "./routes/adminRoutes.js";
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use("/api/upload", uploadRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/inngest", serve({ client: inngest, functions: functions }));
 app.use("/api/addresses",addressRouter);
+app.use('/api/admin', adminRouter);
 
 // Error Handelling
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {

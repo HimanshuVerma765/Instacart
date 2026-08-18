@@ -93,3 +93,45 @@ export const updateDeliveryPartners = async (req: Request, res: Response) => {
     res.status(404).json({ message: "Partner not found" });
   }
 };
+
+// Assign delivery partner for order
+export const assignDeliveryPartners = async (req: Request, res: Response) => {
+  const { partnerId } = req.body;
+
+  const order = await prisma.order.findUnique({
+    where: { id: req.params.id as string },
+  });
+
+  const partner = await prisma.deliveryPartner.findUnique({
+    where: { id: partnerId },
+  });
+
+  const otp = String(Math.floor(100000 + Math.random() * 900000));
+
+  let status = order!.status;
+
+  const history: any[] = Array.isArray(order!.statusHistory)
+    ? order!.statusHistory
+    : [];
+
+  if (order!.status === "Placed" || order!.status === "Confirmed") {
+    status = "Assigned";
+    history.push({
+      status: "Assigned",
+      note: `Assigned to ${partner!.name}`,
+      timestamp: new Date(),
+    });
+  }
+
+  await prisma.order.update({
+    where: { id: order!.id },
+    data: {
+      deliveryPartnerId: partner!.id,
+      deliveryOtp: otp,
+      status,
+      statusHistory: history,
+    },
+  });
+
+  res.json({ order });
+};
