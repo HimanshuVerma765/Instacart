@@ -26,7 +26,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
       take: 8,
       include: {
         user: { select: { name: true, email: true } },
-        deliveryPartne: { select: { name: true, phone: true } },
+        deliveryPartner: { select: { name: true, phone: true } },
       },
     }),
   ]);
@@ -70,4 +70,26 @@ export const createDeliveryPartners = async (req: Request, res: Response) => {
   });
 
   res.status(201).json({ partner });
+};
+
+// Update delivery partner profile
+export const updateDeliveryPartners = async (req: Request, res: Response) => {
+  const { name, phone, vehicleType, isActive } = req.body;
+
+  const data: any = {};
+
+  if (name) data.name = name;
+  if (phone) data.phone = phone;
+  if (vehicleType) data.vehicleType = vehicleType;
+  if (isActive) data.isActive = isActive;
+
+  try {
+    const partner = await prisma.deliveryPartner.update({
+      where: { id: req.params.id as string },
+      data,
+    });
+    res.json({ partner });
+  } catch (error) {
+    res.status(404).json({ message: "Partner not found" });
+  }
 };
