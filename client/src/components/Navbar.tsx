@@ -15,19 +15,14 @@ import {
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
-  const user: any = {
-    name: "Himanshu Verma",
-    email: "abc@gmail.com",
-    isAdmin: true,
-  };
-
   const { cartCount, setIsCartOpen } = useCart();
-
   const [searchQuery, setSearchQuery] = useState("");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const {user, logout} = useAuth();
 
   const handleSearch = (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -38,6 +33,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
+    logout();
     setUserMenuOpen(false);
     navigate("/");
   };
