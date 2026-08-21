@@ -19,7 +19,7 @@ const OrderTracking = () => {
   const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "₹";
 
   useEffect(() => {
-    setOrder(dummyDashboardOrdersData.find((o) => o._id === id) as any);
+    setOrder(dummyDashboardOrdersData.find((o) => o.id === id) as any);
     setLoading(false);
   }, [id, navigate]);
 
@@ -39,7 +39,7 @@ const OrderTracking = () => {
         {/* order id, date, status */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1>Order #{order._id.slice(-8).toUpperCase()}</h1>
+            <h1>Order #{order.id.slice(-8).toUpperCase()}</h1>
             <p>
               Placed on{" "}
               {new Date(order!.createdAt).toLocaleDateString("en-us", {

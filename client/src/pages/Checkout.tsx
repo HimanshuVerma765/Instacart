@@ -25,7 +25,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
 
   const [address, setAddress] = useState<Address>({
-    _id: "",
+    id: "",
     label: "Home",
     address: "",
     city: "",
@@ -59,7 +59,7 @@ const Checkout = () => {
       const defaultAddress =
         user.addresses.find((addr) => addr.isDefault) || user.addresses[0];
       setAddress({
-        _id: defaultAddress?._id,
+        id: defaultAddress?.id,
         label: defaultAddress?.label,
         address: defaultAddress?.address,
         city: defaultAddress?.city,

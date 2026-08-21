@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import type { Product } from "../types";
-import { categoriesData, dummyProducts } from "../assets/assets";
+import { categoriesData} from "../assets/assets";
 import { ChevronDown, Home, SlidersHorizontal, XIcon } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import Loading from "../components/Loading";
 import FilterPanel from "../components/FilterPanel";
+import api from "../config/api";
+import toast from "react-hot-toast";
 
 const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -24,11 +26,23 @@ const Products = () => {
   const fetchProducts = async () => {
     setLoading(true);
 
-    const filteredProducts = dummyProducts.filter(
-      (p) => category === "" || p.category === category,
-    );
+    try {
+      const params = new URLSearchParams();
+      if (category) params.set("category", category);
+      if (organic) params.set("organic", organic);
+      if (sort) params.set("sort", sort);
+      if (maxPrice) params.set("maxPrice", maxPrice);
+      params.set("page", String(page));
+      params.set("limit", "12");
 
-    setProducts(filteredProducts);
+      const { data } = await api.get(`/products?${params.toString()}`);
+      setProducts(data.products);
+      setTotalPages(data.pages);
+    } catch (error:any) {
+      toast.error(error?.response?.data?.message || error?.message);
+    }finally{
+      setLoading(false);
+    }
     setTotalPages(1); // Update this if you add pagination later
 
     setLoading(false);
@@ -101,7 +115,7 @@ const Products = () => {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-2xl fon-semibold text-app-green">
+                <h1 className="text-2xl font-semibold text-app-green">
                   {activeCategory ? activeCategory.name : "All Products"}
                 </h1>
                 <p className="text-sm text-app-text-light mt-0.5">
@@ -160,7 +174,7 @@ const Products = () => {
                 {products.map(
                   (product) =>
                     product.stock > 0 && (
-                      <ProductCard key={product._id} product={product} />
+                      <ProductCard key={product.id} product={product} />
                     ),
                 )}
               </div>
