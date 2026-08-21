@@ -81,7 +81,7 @@ const Addresses = () => {
       const payload = { ...form, ...coords };
 
       if (editingId) {
-        const { data } = await api.put(`/address/${editingId}`, payload);
+        const { data } = await api.put(`/addresses/${editingId}`, payload);
         setAddresses(data.addresses);
         updateUser({ addresses: data.addresses });
         toast.success("Address updated!");

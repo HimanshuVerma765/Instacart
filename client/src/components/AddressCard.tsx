@@ -23,7 +23,7 @@ const AddressCard = ({
         "Are you sure you want to delete this address?",
       );
       if (confirm) {
-        const { data } = await api.delete(`/address/${id}`);
+        const { data } = await api.delete(`/addresses/${id}`);
         setAddresses(data.addresses);
         updateUser({ addresses: data.addresses });
         toast.success("Address deleted!");
