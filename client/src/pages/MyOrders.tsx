@@ -23,7 +23,7 @@ const MyOrders = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const params = activeTab !== "all" ? `?status=${activeTab}` : "";
+      const params = activeTab !== "All" ? `?status=${activeTab}` : "";
       const { data } = await api.get(`/orders${params}`);
       setOrders(data.orders);
     } catch (error: any) {
