@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon } from "lucide-react";
 import { categoriesData, dummyProducts } from "../../assets/assets";
 import Loading from "../../components/Loading";
+import api from "../../config/api";
+import toast from "react-hot-toast";
 
 export default function AdminProductForm() {
   const { id } = useParams();
   const isEdit = Boolean(id);
+
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
@@ -26,16 +30,78 @@ export default function AdminProductForm() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (isEdit) {
-        setFormData(() => dummyProducts.find((p) => p.id === id) as any);
+      try {
+        if (isEdit) {
+          const { data: productData } = await api.get(`/products/${id}`);
+          const p = productData.product;
+          setFormData({
+            name: p.name,
+            description: p.description,
+            price: p.price,
+            originalPrice: p.originalPrice,
+            image: p.image,
+            category: p.category,
+            unit: p.unit,
+            stock: p.stock,
+            isOrganic: p.isOrganic,
+          });
+        }
+      } catch (error: any) {
+        toast.error(
+          error?.response?.data?.message || "Failed to fetch product",
+        );
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchData();
   }, [id, isEdit]);
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    setSaving(true);
+    try {
+      let finalImageUrl = formData.image;
+
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append("image", imageFile);
+        const { data } = await api.post("/upload", formData);
+        finalImageUrl = data.url;
+      }
+
+      if (!finalImageUrl) {
+        toast.error("Please upload a product image");
+        setSaving(false);
+        return;
+      }
+
+      const payload = {
+        ...formData,
+        image: finalImageUrl,
+        price: Number(formData.price),
+        originalPrice: formData.originalPrice
+          ? Number(formData.originalPrice)
+          : 0,
+        stock: Number(formData.stock),
+      };
+
+      if (isEdit) {
+        await api.put(`/products/${id}`, payload);
+        toast.success("Product updated successfully!");
+      } else {
+        await api.post("/products", payload);
+        toast.success("Product added successfully!");
+      }
+      navigate("/admin/products");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Failed to update product");
+    } finally {
+      setSaving(false);
+      if (imageFile) {
+        setImageFile(null);
+      }
+    }
   };
 
   return (
