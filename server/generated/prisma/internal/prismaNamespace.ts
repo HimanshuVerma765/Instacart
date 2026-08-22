@@ -885,6 +885,9 @@ export const OrderScalarFieldEnum = {
   deliveryOtp: 'deliveryOtp',
   liveLocation: 'liveLocation',
   isPaid: 'isPaid',
+  razorpayOrderId: 'razorpayOrderId',
+  razorpayPaymentId: 'razorpayPaymentId',
+  razorpaySignature: 'razorpaySignature',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

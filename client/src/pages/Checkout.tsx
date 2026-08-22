@@ -38,7 +38,7 @@ const Checkout = () => {
     lng: 0,
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("card");
+  const [paymentMethod, setPaymentMethod] = useState("cash");
 
   const deliveryFee = cartTotal > 500 ? 0 : 50;
   const tax = cartTotal * 0.18;
@@ -50,25 +50,96 @@ const Checkout = () => {
     { key: "review", label: "Review", icon: CheckIcon },
   ];
 
-  const handlePlaceOrder = async () => {
+  const buildOrderPayload = () => ({
+    items: items.map((item) => ({
+      product: item.product.id,
+      quantity: item.quantity,
+    })),
+    shippingAddress: address,
+    paymentMethod,
+  });
+
+  const handleRazorpayPayment = async () => {
+    if (!window.Razorpay) {
+      toast.error("Razorpay checkout failed to load. Please refresh and try again.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const orderData = {
-        items: items.map((item) => ({
-          product: item.product.id,
-          quantity: item.quantity,
-        })),
-        shippingAddress: address,
-        paymentMethod,
+      const { data: orderData } = await api.post("/orders", buildOrderPayload());
+      const dbOrder = orderData.order;
+
+      const { data: paymentData } = await api.post("/payment/create-order", {
+        amount: dbOrder.total,
+        orderId: dbOrder.id,
+      });
+
+      const options: RazorpayOptions = {
+        key: paymentData.key,
+        amount: paymentData.order.amount,
+        currency: paymentData.order.currency,
+        name: "Instacart",
+        description: "Grocery order payment",
+        order_id: paymentData.order.id,
+        handler: async (response) => {
+          try {
+            await api.post("/payment/verify", {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: dbOrder.id,
+            });
+
+            clearCart();
+            toast.success("Payment successful!");
+            navigate("/orders");
+          } catch (error: any) {
+            toast.error(
+              error?.response?.data?.message ||
+                error?.message ||
+                "Payment verification failed",
+            );
+          } finally {
+            setLoading(false);
+            scrollTo(0, 0);
+          }
+        },
+        prefill: {
+          name: user?.name,
+          email: user?.email,
+          contact: user?.phone || "",
+        },
+        theme: {
+          color: "#1B3022",
+        },
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+            toast.error("Payment cancelled");
+          },
+        },
       };
 
-      const { data } = await api.post("/orders", orderData);
-      console.log(data);
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || error?.message || "Failed");
+      setLoading(false);
+      scrollTo(0, 0);
+    }
+  };
 
-      if (data.url) {
-        window.location.href = data.url;
-        return;
-      }
+  const handlePlaceOrder = async () => {
+    if (paymentMethod === "RAZORPAY") {
+      await handleRazorpayPayment();
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data } = await api.post("/orders", buildOrderPayload());
+
       clearCart();
       toast.success("Order placed successfully!");
       navigate(`/orders/${data.order.id}`);
@@ -177,6 +248,7 @@ const Checkout = () => {
                 handlePlaceOrder={handlePlaceOrder}
                 loading={loading}
                 total={total}
+                paymentMethod={paymentMethod}
               />
             )}
           </div>

@@ -4,6 +4,13 @@ import { Request, Response } from "express";
 import { prisma } from "../config/prisma.js";
 import { inngest } from "../inngest/index.js";
 
+const unpaidOnlinePaymentFilter = {
+  OR: [
+    { paymentMethod: "RAZORPAY", isPaid: false },
+    { paymentMethod: "card", isPaid: false },
+  ],
+};
+
 // Post:  /api/orders
 export const createOrder = async (req: Request, res: Response) => {
   const { items, shippingAddress, paymentMethod } = req.body;
@@ -71,10 +78,6 @@ export const createOrder = async (req: Request, res: Response) => {
     },
   });
 
-  if (paymentMethod === "card") {
-    // Stripe Payment Link
-  }
-
   res.json({ order });
 
   // Decrease Stock
@@ -103,7 +106,7 @@ export const getUserOrder = async (req: Request, res: Response) => {
 
   const where: any = {
     userId: req.user!.id,
-    NOT: [{ paymentMethod: "card", isPaid: false }],
+    NOT: unpaidOnlinePaymentFilter,
   };
 
   if (status && status !== "all") {
@@ -173,7 +176,7 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
 // Get: /api/orders/all
 export const getAllOrders = async (req: Request, res: Response) => {
   const orders = await prisma.order.findMany({
-    where: { NOT: [{ paymentMethod: "card", isPaid: false }] },
+    where: { NOT: unpaidOnlinePaymentFilter },
     include: {
       user: {
         select: { name: true, email: true },

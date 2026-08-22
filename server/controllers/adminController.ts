@@ -2,6 +2,13 @@ import { Request, Response } from "express";
 import { prisma } from "../config/prisma.js";
 import bcrypt from "bcrypt";
 
+const unpaidOnlinePaymentFilter = {
+  OR: [
+    { paymentMethod: "RAZORPAY", isPaid: false },
+    { paymentMethod: "card", isPaid: false },
+  ],
+};
+
 // Get admin dashboard data
 export const getAdminStats = async (req: Request, res: Response) => {
   const [
@@ -13,7 +20,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
     recentOrders,
   ] = await Promise.all([
     prisma.order.count({
-      where: { NOT: [{ paymentMethod: "card", isPaid: false }] },
+      where: { NOT: unpaidOnlinePaymentFilter },
     }),
 
     prisma.user.count(),
@@ -21,7 +28,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
     prisma.product.count({ where: { stock: 0 } }),
     prisma.deliveryPartner.count(),
     prisma.order.findMany({
-      where: { NOT: [{ paymentMethod: "card", isPaid: false }] },
+      where: { NOT: unpaidOnlinePaymentFilter },
       orderBy: { createdAt: "desc" },
       take: 8,
       include: {

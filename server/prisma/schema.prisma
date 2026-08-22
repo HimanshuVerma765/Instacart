@@ -72,6 +72,9 @@ model Order {
   deliveryOtp       String?          @default("")
   liveLocation      Json?
   isPaid            Boolean?         @default(false)
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
