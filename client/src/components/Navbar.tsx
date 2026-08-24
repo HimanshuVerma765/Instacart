@@ -12,8 +12,8 @@ import {
   UserIcon,
   XIcon,
 } from "lucide-react";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 
@@ -21,8 +21,15 @@ const Navbar = () => {
   const { cartCount, setIsCartOpen } = useCart();
   const [searchQuery, setSearchQuery] = useState("");
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
-  const {user, logout} = useAuth();
+  const { user, logout } = useAuth();
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 12);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleSearch = (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -39,8 +46,12 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white sticky top-0 z-50 border-b border-app-border">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 gap-4">
+    <nav
+      className={`sticky top-0 z-50 border-b border-app-border transition-all duration-300 ${isScrolled ? "bg-white/85 backdrop-blur-xl shadow-sm" : "bg-white"}`}
+    >
+      <div
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 transition-all duration-300 ${isScrolled ? "h-14" : "h-16"}`}
+      >
         <Link
           to="/"
           className="flex items-center gap-2 text-[22px] font-medium shrink-0"
@@ -51,11 +62,21 @@ const Navbar = () => {
 
         <div className="w-full flex items-center justify-end gap-4 lg:gap-10">
           <div className="hidden md:flex items-center gap-6 text-sm text-zinc-600 font-semibold">
-            <Link to="/">Home</Link>
-            <Link to="/products">Products</Link>
-            <Link to="/deals" className="text-app-orange">
-              Deals
-            </Link>
+            {[
+              { to: "/", label: "Home" },
+              { to: "/products", label: "Products" },
+              { to: "/deals", label: "Deals" },
+            ].map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `relative py-2 transition-colors after:absolute after:left-0 after:right-0 after:bottom-0 after:h-0.5 after:origin-left after:bg-app-green-lighter after:transition-transform ${isActive ? "text-app-green after:scale-x-100" : "after:scale-x-0 hover:text-app-green after:hover:scale-x-100"}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
           </div>
 
           <form

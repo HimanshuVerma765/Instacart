@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import type { Product } from "../types";
 import { Plus, Star } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { motion } from "framer-motion";
 
 interface Props {
   product: Product;
@@ -10,11 +11,14 @@ interface Props {
 const ProductCard = ({ product }: Props) => {
   const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "₹";
 
-  const { addToCart } = useCart();
+  const { addToCart, items, updateQuantity } = useCart();
   const navigate = useNavigate();
+  const cartItem = items.find((item) => item.product.id === product.id);
 
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -5, boxShadow: "0 16px 30px rgba(30, 58, 138, 0.12)" }}
+      transition={{ type: "spring", stiffness: 320, damping: 24 }}
       className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-md transition-all duration-300 group animate-fade-in cursor-pointer"
       onClick={() => navigate(`/products/${product.id}`)}
     >
@@ -23,7 +27,7 @@ const ProductCard = ({ product }: Props) => {
         <img
           src={product.image}
           alt={product.name}
-          className="w-full h-full object-cover p-4 group-hover:p-2 transition-all duration-300"
+          className="w-full h-full object-cover p-4 group-hover:scale-105 transition-transform duration-300"
         />
 
         {/* Badges */}
@@ -72,18 +76,51 @@ const ProductCard = ({ product }: Props) => {
               )}
             </span>
           </div>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              addToCart(product);
-            }}
-            className="size-7 rounded-full bg-app-orange text-white flex-center shrink-0 hover:bg-app-orange-dark transition-colors active:scale-95"
-          >
-            <Plus className="size-3.5" />
-          </button>
+          {cartItem ? (
+            <motion.div
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              className="flex items-center gap-1 rounded-full bg-app-green text-white px-1 py-1"
+            >
+              <button
+                aria-label={`Decrease ${product.name} quantity`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateQuantity(product.id, cartItem.quantity - 1);
+                }}
+                className="size-5 rounded-full flex-center hover:bg-white/20 active:scale-90"
+              >
+                -
+              </button>
+              <span className="text-xs font-semibold min-w-4 text-center">
+                {cartItem.quantity}
+              </span>
+              <button
+                aria-label={`Increase ${product.name} quantity`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateQuantity(product.id, cartItem.quantity + 1);
+                }}
+                className="size-5 rounded-full flex-center hover:bg-white/20 active:scale-90"
+              >
+                +
+              </button>
+            </motion.div>
+          ) : (
+            <motion.button
+              whileTap={{ scale: 0.86 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                addToCart(product);
+              }}
+              className="size-7 rounded-full bg-app-orange text-white flex-center shrink-0 hover:bg-app-orange-dark transition-colors"
+            >
+              <Plus className="size-3.5" />
+            </motion.button>
+          )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -1,7 +1,7 @@
-
 const FilterPanel = ({
   categories,
   category,
+  organic,
   minPrice,
   maxPrice,
   updateFilter,
@@ -36,6 +36,20 @@ const FilterPanel = ({
             </button>
           ))}
         </div>
+      </div>
+
+      <div>
+        <label className="flex items-center gap-3 text-sm text-app-text-light cursor-pointer">
+          <input
+            type="checkbox"
+            checked={organic === "true"}
+            onChange={(event) =>
+              updateFilter("organic", event.target.checked ? "true" : "")
+            }
+            className="size-4 accent-app-green"
+          />
+          Organic products only
+        </label>
       </div>
 
       {/* Price Range */}

@@ -12,21 +12,20 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const {login, register} = useAuth();
+  const { login, register } = useAuth();
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if(isLoginState){
-        await login(email,password);
+      if (isLoginState) {
+        await login(email, password);
+      } else {
+        await register(name, email, password);
       }
-      else{
-        await register(name, email, password)
-      }
-    } catch (error:any) {
+    } catch (error: any) {
       toast.error(error?.response?.data?.message || error?.message);
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -34,7 +33,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Side */}
-      <div className="hidden lg:flex lg:w-1/2 bg-app-green relative items-center justify-center">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#1b3022] relative items-center justify-center">
         <img
           src={hero_bg}
           alt=""
@@ -128,8 +127,18 @@ const Login = () => {
                 />
               </div>
             </label>
-            <button type="submit" disabled={loading} className="flex-center w-full py-3  bg-green-950 text-white font-semibold rounded-xl hover:bg-green-900 transition-colors  disabled:opacity-50">
-              {loading ? <Loader2Icon className="animate-spin" /> : isLoginState ? "Sign In" : "Sign Up" }
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-center w-full py-3  bg-green-950 text-white font-semibold rounded-xl hover:bg-green-900 transition-colors  disabled:opacity-50"
+            >
+              {loading ? (
+                <Loader2Icon className="animate-spin" />
+              ) : isLoginState ? (
+                "Sign In"
+              ) : (
+                "Sign Up"
+              )}
             </button>
           </form>
         </div>

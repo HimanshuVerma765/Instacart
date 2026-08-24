@@ -8,6 +8,7 @@ import {
   Trash2Icon,
   XIcon,
 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 const CartSideBar = () => {
   const currency = import.meta.env.VITE_CURRENCY_SYMBOL || "₹";
@@ -31,13 +32,22 @@ const CartSideBar = () => {
   return (
     <>
       {/* Overlay */}
-      <div
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         onClick={() => setIsCartOpen(false)}
         className="fixed inset-0 bg-black/40 z-40 transition-opacity"
       />
 
       {/* Sidebar */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col animate-slide-in-fade">
+      <motion.div
+        initial={{ x: "100%" }}
+        animate={{ x: 0 }}
+        exit={{ x: "100%" }}
+        transition={{ type: "spring", stiffness: 300, damping: 32 }}
+        className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
@@ -66,65 +76,72 @@ const CartSideBar = () => {
               <h3 className="text-lg font-medium mb-1">Your cart is empty</h3>
             </div>
           ) : (
-            items.map((item) => (
-              <div
-                key={item.product.id}
-                className="flex gap-3 bg-app-cream/60 rounded-xl p-3"
-              >
-                <img
-                  className="size-16 rounded-lg object-cover shrink-0"
-                  src={item.product.image}
-                  alt={item.product.name}
-                />
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-sm font-semibold truncate">
-                    {item.product.name}
-                  </h4>
-                  <p className="text-xs text-app-text-light">
-                    {currency}
-                    {item.product.price.toFixed(2)} / {item.product.unit}
-                  </p>
+            <AnimatePresence initial={false}>
+              {items.map((item) => (
+                <motion.div
+                  key={item.product.id}
+                  layout
+                  initial={{ opacity: 0, height: 0, y: 12 }}
+                  animate={{ opacity: 1, height: "auto", y: 0 }}
+                  exit={{ opacity: 0, height: 0, x: 80 }}
+                  transition={{ type: "spring", stiffness: 320, damping: 28 }}
+                  className="flex gap-3 bg-app-cream/60 rounded-xl p-3"
+                >
+                  <img
+                    className="size-16 rounded-lg object-cover shrink-0"
+                    src={item.product.image}
+                    alt={item.product.name}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-semibold truncate">
+                      {item.product.name}
+                    </h4>
+                    <p className="text-xs text-app-text-light">
+                      {currency}
+                      {item.product.price.toFixed(2)} / {item.product.unit}
+                    </p>
 
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        onClick={() =>
-                          updateQuantity(item.product.id, item.quantity - 1)
-                        }
-                        className="size-7 rounded-lg bg-white border border-app-border flex-center"
-                      >
-                        <MinusIcon className="size-3" />
-                      </button>
-                      <span className="text-sm font-semibold w-6 text-center">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() =>
-                          updateQuantity(item.product.id, item.quantity + 1)
-                        }
-                        className="size-7 rounded-lg bg-white border border-app-border flex-center"
-                      >
-                        <PlusIcon className="size-3" />
-                      </button>
-                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() =>
+                            updateQuantity(item.product.id, item.quantity - 1)
+                          }
+                          className="size-7 rounded-lg bg-white border border-app-border flex-center"
+                        >
+                          <MinusIcon className="size-3" />
+                        </button>
+                        <span className="text-sm font-semibold w-6 text-center">
+                          {item.quantity}
+                        </span>
+                        <button
+                          onClick={() =>
+                            updateQuantity(item.product.id, item.quantity + 1)
+                          }
+                          className="size-7 rounded-lg bg-white border border-app-border flex-center"
+                        >
+                          <PlusIcon className="size-3" />
+                        </button>
+                      </div>
 
-                    <div className="flex items-center gap-1.5">
-                      <span className="ttext-sm font-semibold">
-                        {currency}
-                        {(item.product.price * item.quantity).toFixed(2)}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="ttext-sm font-semibold">
+                          {currency}
+                          {(item.product.price * item.quantity).toFixed(2)}
+                        </span>
 
-                      <button
-                        onClick={() => removeFromCart(item.product.id)}
-                        className="p-1 text-app-text-light hover:text-app-error transition-colors"
-                      >
-                        <Trash2Icon className="size-4" />
-                      </button>
+                        <button
+                          onClick={() => removeFromCart(item.product.id)}
+                          className="p-1 text-app-text-light hover:text-app-error transition-colors"
+                        >
+                          <Trash2Icon className="size-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            ))
+                </motion.div>
+              ))}
+            </AnimatePresence>
           )}
         </div>
 
@@ -175,7 +192,7 @@ const CartSideBar = () => {
             Proceed to Checkout <ArrowRightIcon className="size-4" />
           </button>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };

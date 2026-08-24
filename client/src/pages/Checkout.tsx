@@ -40,6 +40,22 @@ const Checkout = () => {
 
   const [paymentMethod, setPaymentMethod] = useState("cash");
 
+  const hasValidAddress = Boolean(
+    address.address.trim() &&
+    address.city.trim() &&
+    address.state.trim() &&
+    address.zip.trim(),
+  );
+
+  const changeStep = (nextStep: string) => {
+    if ((nextStep === "payment" || nextStep === "review") && !hasValidAddress) {
+      toast.error("Please add a delivery address first.");
+      setStep("address");
+      return;
+    }
+    setStep(nextStep);
+  };
+
   const deliveryFee = cartTotal > 500 ? 0 : 50;
   const tax = cartTotal * 0.18;
   const total = cartTotal + deliveryFee + tax;
@@ -61,13 +77,18 @@ const Checkout = () => {
 
   const handleRazorpayPayment = async () => {
     if (!window.Razorpay) {
-      toast.error("Razorpay checkout failed to load. Please refresh and try again.");
+      toast.error(
+        "Razorpay checkout failed to load. Please refresh and try again.",
+      );
       return;
     }
 
     setLoading(true);
     try {
-      const { data: orderData } = await api.post("/orders", buildOrderPayload());
+      const { data: orderData } = await api.post(
+        "/orders",
+        buildOrderPayload(),
+      );
       const dbOrder = orderData.order;
 
       const { data: paymentData } = await api.post("/payment/create-order", {
@@ -131,6 +152,12 @@ const Checkout = () => {
   };
 
   const handlePlaceOrder = async () => {
+    if (!hasValidAddress) {
+      toast.error("Please add a delivery address first.");
+      setStep("address");
+      return;
+    }
+
     if (paymentMethod === "RAZORPAY") {
       await handleRazorpayPayment();
       return;
@@ -209,7 +236,7 @@ const Checkout = () => {
           {steps.map((s, i) => (
             <div key={s.key} className="flex items-center gap-2">
               <button
-                onClick={() => setStep(s.key)}
+                onClick={() => changeStep(s.key)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${step === s.key ? "bg-app-green text-white" : "bg-white text-app-text-light"}`}
               >
                 <s.icon className="size-4" /> {s.label}
@@ -228,7 +255,7 @@ const Checkout = () => {
               <CheckoutAddress
                 address={address}
                 setAddress={setAddress}
-                setStep={setStep}
+                setStep={changeStep}
                 user={user}
               />
             )}
@@ -237,7 +264,7 @@ const Checkout = () => {
               <CheckoutPayment
                 paymentMethod={paymentMethod}
                 setPaymentMethod={setPaymentMethod}
-                setStep={setStep}
+                setStep={changeStep}
               />
             )}
 

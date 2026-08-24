@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import type { Product } from "../types";
-import { categoriesData} from "../assets/assets";
+import { categoriesData } from "../assets/assets";
 import { ChevronDown, Home, SlidersHorizontal, XIcon } from "lucide-react";
 import ProductCard from "../components/ProductCard";
 import Loading from "../components/Loading";
@@ -32,20 +32,18 @@ const Products = () => {
       if (organic) params.set("organic", organic);
       if (sort) params.set("sort", sort);
       if (maxPrice) params.set("maxPrice", maxPrice);
+      if (minPrice) params.set("minPrice", minPrice);
       params.set("page", String(page));
       params.set("limit", "12");
 
       const { data } = await api.get(`/products?${params.toString()}`);
       setProducts(data.products);
       setTotalPages(data.pages);
-    } catch (error:any) {
+    } catch (error: any) {
       toast.error(error?.response?.data?.message || error?.message);
-    }finally{
+    } finally {
       setLoading(false);
     }
-    setTotalPages(1); // Update this if you add pagination later
-
-    setLoading(false);
   };
 
   const updateFilter = (key: string, value: string) => {
@@ -140,8 +138,8 @@ const Products = () => {
                     className="appearance-none pl-3 pr-8 py-2 text-sm bg-white rounded-xl border border-app-border focus:border-app-green outline-none cursor-pointer"
                   >
                     <option value="">Newest</option>
-                    <option value="price_asc">Price : Low → High</option>
-                    <option value="price_desc">Price : High → Low</option>
+                    <option value="price-low">Price : Low → High</option>
+                    <option value="price-high">Price : High → Low</option>
                     <option value="rating">Top Rated</option>
                     <option value="name">A → Z</option>
                   </select>
