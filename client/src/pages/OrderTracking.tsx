@@ -98,7 +98,7 @@ const OrderTracking = () => {
             {/* OTP Card */}
             <OrderOTP order={order} />
             {/* Live Tracking Map */}
-            <LiveMap order={order} liveLocation={location} />
+            <LiveMap order={order} liveLocation={liveLocation} />
             {/* Progress Timeline */}
             <OrderTimeLine order={order} />
 

@@ -1,4 +1,3 @@
-import CartSideBar from "../components/CartSideBar";
 import Features from "../components/Home/Features";
 import Hero from "../components/Home/Hero";
 import HomeCategories from "../components/Home/HomeCategories";
