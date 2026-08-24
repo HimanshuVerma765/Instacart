@@ -27,17 +27,16 @@ export default function DeliveryLogin() {
     }
   };
 
-
-  useEffect(()=>{
-    if(localStorage.getItem("delivery_token")){
+  useEffect(() => {
+    if (localStorage.getItem("delivery_token")) {
       navigate("/delivery");
     }
-  })
+  });
 
   return (
     <div className="min-h-screen flex">
       {/* Left Side */}
-      <div className="hidden lg:flex lg:w-1/2 bg-app-green relative items-center justify-center">
+      <div className="hidden lg:flex lg:w-1/2 bg-[#1b3022] relative items-center justify-center">
         <img
           src={heroSectionData.hero_image}
           alt=""
